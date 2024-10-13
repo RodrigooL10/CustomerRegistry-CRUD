@@ -1,34 +1,26 @@
-﻿using System.Net;
+﻿using CustomerRegistrySystem.Models.Domain;
 
-namespace CustomerRegistrySystem.Models.Domain
+namespace CustomerRegistrySystem.Models
 {
-    public class Customer
+    public class AddCustomerViewModel
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
-        public ICollection<Address> Addresses { get; set; }
 
+        // Lista para suportar múltiplos endereços
+        public List<AddAddressViewModel> Addresses { get; set; }
     }
 
-    public class Address
+    public class AddAddressViewModel
     {
         public Guid Id { get; set; }
         public string Street { get; set; }
         public string City { get; set; }
         public string State { get; set; }
         public string CEP { get; set; }
-        public AddressType Type { get; set; }
         public string Complement { get; set; }
-        public Guid CustomerId { get; set; }
-        public Customer Customer { get; set; }
-    }
-
-    public enum AddressType
-    {
-        Fiscal,
-        Cobrança,
-        Entrega
+        public AddressType Type { get; set; }
     }
 }
