@@ -44,7 +44,7 @@ namespace CustomerRegistrySystem.Controllers
                 Name = addCustomerRequest.Name,
                 Email = addCustomerRequest.Email,
                 Phone = addCustomerRequest.Phone,
-                
+
                 //adicionando Endereços
                 Addresses = addCustomerRequest.Addresses.Select(address => new Address
                 {
@@ -138,6 +138,37 @@ namespace CustomerRegistrySystem.Controllers
             return RedirectToAction("Show"); // Redireciona em caso de erro
         }
 
+        //Deleta cliente
+        [HttpPost]
+        public async Task<IActionResult> Delete(EditCustomerViewModel viewModel)
+        {
+            var customer = await customerRegistryDBContext.Customers.FindAsync(viewModel.Id);
 
+            if (customer != null)
+            {
+                customerRegistryDBContext.Customers.Remove(customer);
+                await customerRegistryDBContext.SaveChangesAsync();
+
+                return Ok();
+            }
+            return NotFound();
+        }
+
+        //Deleta Endereço
+        [HttpPost]
+        public async Task<IActionResult> DeleteAddress(Guid id)
+        {
+            var address = await customerRegistryDBContext.Addresses.FindAsync(id);
+
+            if (address != null)
+            {
+                customerRegistryDBContext.Addresses.Remove(address);
+                await customerRegistryDBContext.SaveChangesAsync();
+
+                return Ok(); // Retorna uma resposta de sucesso
+            }
+
+            return NotFound(); // Retorna 404 se o endereço não for encontrado
+        }
     }
 }
