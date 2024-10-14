@@ -63,5 +63,81 @@ namespace CustomerRegistrySystem.Controllers
 
             return RedirectToAction("Show");
         }
+
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            // Busca o cliente pelo ID
+            var customer = await customerRegistryDBContext.Customers
+                .Include(c => c.Addresses) // Incluindo os endereços, se necessário
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (customer != null)
+            {
+                // Criação do ViewModel para atualização
+                var viewModel = new EditCustomerViewModel()
+                {
+                    Id = customer.Id,
+                    Name = customer.Name,
+                    Email = customer.Email,
+                    Phone = customer.Phone,
+                    Addresses = customer.Addresses.Select(a => new EditAddressViewModel
+                    {
+                        Id = a.Id,
+                        Street = a.Street,
+                        City = a.City,
+                        State = a.State,
+                        CEP = a.CEP,
+                        Type = a.Type
+                    }).ToList() // Preenchendo a lista de endereços
+                };
+
+                return View("Edit", viewModel); // Retorna a view de edição com o ViewModel
+            }
+
+            return RedirectToAction("Show");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(EditCustomerViewModel viewModel)
+        {
+            // Busca o cliente pelo ID
+            var customer = await customerRegistryDBContext.Customers
+                .Include(c => c.Addresses) // Inclui endereços para atualização
+                .FirstOrDefaultAsync(x => x.Id == viewModel.Id);
+
+            if (customer != null)
+            {
+                // Atualiza os dados do cliente
+                customer.Name = viewModel.Name;
+                customer.Email = viewModel.Email;
+                customer.Phone = viewModel.Phone;
+
+                // Atualiza os endereços
+                foreach (var addressModel in viewModel.Addresses)
+                {
+                    var address = customer.Addresses.FirstOrDefault(a => a.Id == addressModel.Id);
+                    if (address != null)
+                    {
+                        address.Street = addressModel.Street;
+                        address.City = addressModel.City;
+                        address.State = addressModel.State;
+                        address.CEP = addressModel.CEP;
+                        address.Type = addressModel.Type;
+                    }
+                }
+
+                await customerRegistryDBContext.SaveChangesAsync(); // Salva as alterações no banco de dados
+
+                return RedirectToAction("Show"); // Redireciona para a lista de clientes
+            }
+
+            return RedirectToAction("Show"); // Redireciona em caso de erro
+        }
+
+
     }
 }

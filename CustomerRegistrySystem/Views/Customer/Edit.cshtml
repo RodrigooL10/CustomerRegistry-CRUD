@@ -1,0 +1,75 @@
+﻿@model CustomerRegistrySystem.Models.EditCustomerViewModel
+
+<div class="container mt-4">
+    <h2>Editar Cliente</h2>
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Phone" class="form-label"></label>
+            <input asp-for="Phone" class="form-control" />
+            <span asp-validation-for="Phone" class="text-danger"></span>
+        </div>
+
+        <h4>Endereços</h4>
+        @for (int i = 0; i < Model.Addresses.Count; i++)
+        {
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Endereço @(i + 1)</h5> <!-- Número do endereço -->
+                    <input type="hidden" asp-for="Addresses[i].Id" />
+
+                    <div class="mb-3">
+                        <label asp-for="Addresses[i].Street" class="form-label"></label>
+                        <input asp-for="Addresses[i].Street" class="form-control" />
+                        <span asp-validation-for="Addresses[i].Street" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Addresses[i].City" class="form-label"></label>
+                        <input asp-for="Addresses[i].City" class="form-control" />
+                        <span asp-validation-for="Addresses[i].City" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Addresses[i].State" class="form-label"></label>
+                        <input asp-for="Addresses[i].State" class="form-control" />
+                        <span asp-validation-for="Addresses[i].State" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Addresses[i].CEP" class="form-label"></label>
+                        <input asp-for="Addresses[i].CEP" class="form-control" />
+                        <span asp-validation-for="Addresses[i].CEP" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Addresses[i].Type" class="form-label"></label>
+                        <select asp-for="Addresses[i].Type" class="form-select">
+                            <option value="0">Fiscal</option>
+                            <option value="1">Cobrança</option>
+                            <option value="2">Entrega</option>
+                        </select>
+                        <span asp-validation-for="Addresses[i].Type" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <button type="submit" class="btn btn-primary">Atualizar</button>
+        <a asp-action="Show" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
