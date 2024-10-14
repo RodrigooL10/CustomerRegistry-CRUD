@@ -1,0 +1,123 @@
+﻿@model List<CustomerRegistrySystem.Models.Domain.Customer>
+@{
+    ViewData["Title"] = "Clientes";
+}
+@using DevExtreme.AspNet.Data
+@using DevExtreme.AspNet.Mvc
+
+<h1>Clientes</h1>
+
+<div id="gridCustomers"></div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            console.log(@Html.Raw(Json.Serialize(Model)));
+
+            const data = @Html.Raw(Json.Serialize(Model));
+            // Extraindo os dados dos clientes
+            const customers = data.$values;
+
+            $("#gridCustomers").dxDataGrid({
+                dataSource: customers, // Use apenas a lista de clientes
+                columns: [
+                    { dataField: "Id", caption: "ID" },
+                    { dataField: "Name", caption: "Name" },
+                    { dataField: "Email", caption: "Email" },
+                    { dataField: "Phone", caption: "Telefone" },
+                    {
+                        type: "buttons",
+                        buttons: [
+                            {
+                                text: "Edit",
+                                onClick: function (e) {
+                                    const id = e.row.data.Id;
+                                    window.location.href = `/Customer/Edit/${id}`;
+                                },
+                                cssClass: "button-custom button-margin text-white text-decoration-none"
+                            },
+                            {
+                                text: "Delete",
+                                onClick: function (e) {
+                                    const id = e.row.data.Id;
+                                    if (confirm("Are you sure you want to delete this customer?")) {
+                                        $.ajax({
+                                            url: `/Customer/Delete/${id}`,
+                                            type: "POST",
+                                            success: function () {
+                                                $("#gridCustomers").dxDataGrid("instance").refresh();
+                                            },
+                                            error: function () {
+                                                alert("Error while deleting the customer");
+                                            }
+                                        });
+                                    }
+                                },
+                                cssClass: "button-margin btn-danger text-white text-decoration-none"
+                            }
+                        ]
+                    }
+                ],
+                paging: { enabled: true },
+                sorting: { mode: "multiple" },
+                searchPanel: { visible: true },
+                filterRow: { visible: true },
+                masterDetail: {
+                    enabled: true,
+                    template: function (container, options) {
+                        var customer = options.data;
+
+                        if (customer.Addresses && customer.Addresses.$values && Array.isArray(customer.Addresses.$values)) {
+                            $("<div>")
+                                .dxDataGrid({
+                                    dataSource: customer.Addresses.$values, // Acessando a lista de endereços
+                                    columns: [
+                                        { dataField: "Street", caption: "Rua" },
+                                        { dataField: "City", caption: "Cidade" },
+                                        { dataField: "State", caption: "Estado" },
+                                        { dataField: "CEP", caption: "CEP" },
+                                        { dataField: "Type",
+                                          caption: "Tipo de Endereço",
+                                          calculateDisplayValue: function (data) {
+                                            switch (data.Type) {
+                                                case 0: return "Fiscal";
+                                                case 1: return "Cobrança";
+                                                case 2: return "Entrega";
+                                                default: return "Desconhecido"; // Valor padrão
+                                              }
+                                            }
+                                        }
+                                    ],
+                                    showBorders: true,
+                                    height: 150,
+                                }).appendTo(container);
+                        } else {
+                            $("<div>No addresses available</div>").appendTo(container);
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .button-margin {
+            margin-right: 10px;
+            text-decoration: none;
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .button-custom {
+            background-color: #007bff;
+        }
+
+            .button-custom:hover {
+                background-color: #0056b3;
+            }
+    </style>
+}

@@ -18,14 +18,17 @@ namespace CustomerRegistrySystem.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Show()
         {
-            var customers = await customerRegistryDBContext.Customers.ToListAsync();
+            var customers = await customerRegistryDBContext.Customers
+                .Include(c => c.Addresses)
+                .ToListAsync();
 
             return View(customers);
-
         }
 
+
+        //Adicionar Cliente
         [HttpGet]
         public IActionResult Add()
         {
@@ -58,7 +61,7 @@ namespace CustomerRegistrySystem.Controllers
             await customerRegistryDBContext.Customers.AddAsync(customer);
             await customerRegistryDBContext.SaveChangesAsync();
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Show");
         }
     }
 }
