@@ -64,9 +64,6 @@ namespace CustomerRegistrySystem.Controllers
             return RedirectToAction("Show");
         }
 
-
-
-
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
@@ -91,6 +88,7 @@ namespace CustomerRegistrySystem.Controllers
                         City = a.City,
                         State = a.State,
                         CEP = a.CEP,
+                        Complement = a.Complement,
                         Type = a.Type
                     }).ToList() // Preenchendo a lista de endereços
                 };
@@ -104,39 +102,109 @@ namespace CustomerRegistrySystem.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(EditCustomerViewModel viewModel)
         {
-            // Busca o cliente pelo ID
-            var customer = await customerRegistryDBContext.Customers
-                .Include(c => c.Addresses) // Inclui endereços para atualização
-                .FirstOrDefaultAsync(x => x.Id == viewModel.Id);
-
-            if (customer != null)
+            try
             {
+                var customer = await customerRegistryDBContext.Customers
+                    .Include(c => c.Addresses)
+                    .FirstOrDefaultAsync(x => x.Id == viewModel.Id);
+
+                if (customer == null)
+                {
+                    return NotFound(); // Retorna um erro 404 se o cliente não for encontrado
+                }
+
                 // Atualiza os dados do cliente
                 customer.Name = viewModel.Name;
                 customer.Email = viewModel.Email;
                 customer.Phone = viewModel.Phone;
 
-                // Atualiza os endereços
+                // Armazena os endereços existentes em um dicionário
+                var existingAddresses = customer.Addresses.ToDictionary(a => a.Id);
+
+                // Lista para armazenar novos endereços
+                var newAddresses = new List<Address>();
+
                 foreach (var addressModel in viewModel.Addresses)
                 {
-                    var address = customer.Addresses.FirstOrDefault(a => a.Id == addressModel.Id);
-                    if (address != null)
+                    if (addressModel.Id == Guid.Empty) // Verifica se o ID é vazio
                     {
-                        address.Street = addressModel.Street;
-                        address.City = addressModel.City;
-                        address.State = addressModel.State;
-                        address.CEP = addressModel.CEP;
-                        address.Type = addressModel.Type;
+                        // Adiciona novos endereços
+                        var newAddress = new Address
+                        {
+                            Id = Guid.NewGuid(), // Gera um novo GUID
+                            Street = addressModel.Street,
+                            City = addressModel.City,
+                            State = addressModel.State,
+                            CEP = addressModel.CEP,
+                            Complement = addressModel.Complement,
+                            Type = addressModel.Type
+                        };
+
+                        newAddresses.Add(newAddress); // Adiciona à lista de novos endereços
+                    }
+                    else
+                    {
+                        // Atualiza endereços existentes
+                        if (existingAddresses.TryGetValue(addressModel.Id, out var existingAddress))
+                        {
+                            existingAddress.Street = addressModel.Street;
+                            existingAddress.City = addressModel.City;
+                            existingAddress.State = addressModel.State;
+                            existingAddress.CEP = addressModel.CEP;
+                            existingAddress.Complement = addressModel.Complement;
+                            existingAddress.Type = addressModel.Type;
+                        }
+                        else
+                        {
+                            // Adiciona novo endereço se não estiver no dicionário
+                            newAddresses.Add(new Address
+                            {
+                                Id = addressModel.Id,
+                                Street = addressModel.Street,
+                                City = addressModel.City,
+                                State = addressModel.State,
+                                CEP = addressModel.CEP,
+                                Complement = addressModel.Complement,
+                                Type = addressModel.Type
+                            });
+                        }
                     }
                 }
 
-                await customerRegistryDBContext.SaveChangesAsync(); // Salva as alterações no banco de dados
+                // Adiciona novos endereços à lista de endereços do cliente
+                foreach (var newAddress in newAddresses)
+                {
+                    customer.Addresses.Add(newAddress);
+                }
 
-                return RedirectToAction("Show"); // Redireciona para a lista de clientes
+                // Remove endereços que não estão mais na lista de endereços do viewModel
+                var addressesToRemove = customer.Addresses
+                    .Where(a => !viewModel.Addresses.Any(am => am.Id == a.Id))
+                    .ToList();
+
+                foreach (var address in addressesToRemove)
+                {
+                    customer.Addresses.Remove(address);
+                    customerRegistryDBContext.Addresses.Remove(address); // Remover também do banco
+                }
+
+                await customerRegistryDBContext.SaveChangesAsync();
+
+                return RedirectToAction("Show");
             }
-
-            return RedirectToAction("Show"); // Redireciona em caso de erro
+            catch (Exception ex)
+            {
+                // Logue a exceção para ajudar no diagnóstico
+                Console.WriteLine($"Erro: {ex.Message}");
+                // Retorna a mesma view para que o usuário possa tentar novamente
+                return View(viewModel);
+            }
         }
+
+
+
+
+
 
         //Deleta cliente
         [HttpPost]

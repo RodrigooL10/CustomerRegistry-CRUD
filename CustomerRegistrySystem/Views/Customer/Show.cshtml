@@ -12,35 +12,32 @@
 @section Scripts {
     <script>
         $(function () {
-            console.log(@Html.Raw(Json.Serialize(Model)));
-
             const data = @Html.Raw(Json.Serialize(Model));
-            // Extraindo os dados dos clientes
             const customers = data.$values;
 
             $("#gridCustomers").dxDataGrid({
-                dataSource: customers, // Use apenas a lista de clientes
+                dataSource: customers,
                 columns: [
-                    { dataField: "Id", caption: "ID" },
-                    { dataField: "Name", caption: "Name" },
-                    { dataField: "Email", caption: "Email" },
-                    { dataField: "Phone", caption: "Telefone" },
+                    { dataField: "Id", caption: "ID"},
+                    { dataField: "Name", caption: "Nome"},
+                    { dataField: "Email", caption: "Email"},
+                    { dataField: "Phone", caption: "Telefone"},
                     {
                         type: "buttons",
                         buttons: [
                             {
-                                text: "Edit",
+                                text: "Editar",
                                 onClick: function (e) {
                                     const id = e.row.data.Id;
                                     window.location.href = `/Customer/Edit/${id}`;
                                 },
-                                cssClass: "button-custom button-margin text-white text-decoration-none"
+                                cssClass: "btn btn-primary mx-1 button-custom text-white text-decoration-none"
                             },
                             {
-                                text: "Delete",
+                                text: "Deletar",
                                 onClick: function (e) {
                                     const id = e.row.data.Id;
-                                    if (confirm("Tem certeza que deseja deletar esse cliente?")) {
+                                    if (confirm("Tem certeza de que deseja deletar este cliente?")) {
                                         $.ajax({
                                             url: `/Customer/Delete/${id}`,
                                             type: "POST",
@@ -48,20 +45,21 @@
                                                 $("#gridCustomers").dxDataGrid("instance").refresh();
                                             },
                                             error: function () {
-                                                alert("Error while deleting the customer");
+                                                alert("Erro ao deletar o cliente");
                                             }
                                         });
                                     }
                                 },
-                                cssClass: "button-margin btn-danger text-white text-decoration-none"
+                                cssClass: "btn btn-danger mx-1 button-custom text-white text-decoration-none"
                             }
                         ]
                     }
                 ],
-                paging: { enabled: true },
+                paging: { pageSize: 10 },
+                height: 700,
                 sorting: { mode: "multiple" },
-                searchPanel: { visible: true },
-                filterRow: { visible: true },
+                searchPanel: { visible: true, placeholder: "Pesquisar..." },
+                filterRow: { visible: true, applyFilter: "auto" },
                 masterDetail: {
                     enabled: true,
                     template: function (container, options) {
@@ -70,12 +68,13 @@
                         if (customer.Addresses && customer.Addresses.$values && Array.isArray(customer.Addresses.$values)) {
                             $("<div>")
                                 .dxDataGrid({
-                                    dataSource: customer.Addresses.$values, // Acessando a lista de endereços
+                                    dataSource: customer.Addresses.$values,
                                     columns: [
                                         { dataField: "Street", caption: "Rua" },
                                         { dataField: "City", caption: "Cidade" },
                                         { dataField: "State", caption: "Estado" },
                                         { dataField: "CEP", caption: "CEP" },
+                                        { dataField: "Complement", caption: "Complemento" },
                                         {
                                             dataField: "Type",
                                             caption: "Tipo de Endereço",
@@ -84,42 +83,40 @@
                                                     case 0: return "Fiscal";
                                                     case 1: return "Cobrança";
                                                     case 2: return "Entrega";
-                                                    default: return "Desconhecido"; // Valor padrão
+                                                    default: return "Desconhecido";
                                                 }
                                             }
                                         },
-                                        {
-                                            type: "buttons",
-                                            buttons: [
-                                                {
-                                                    text: "Delete",
-                                                    onClick: function (e) {
-                                                        const addressId = e.row.data.Id; // ID do endereço
-                                                        if (confirm("Tem certeza que deseja deletar esse endereço?")) {
-                                                            $.ajax({
-                                                                url: `/Customer/DeleteAddress/${addressId}`, // URL para o método DeleteAddress
-                                                                type: "POST",
-                                                                success: function () {
-                                                                    $("#gridCustomers").dxDataGrid("instance").refresh(); // Atualiza o grid após a exclusão
-                                                                },
-                                                                error: function () {
-                                                                    alert("Error while deleting the address");
-                                                                }
-                                                            });
-                                                        }
-                                                    },
-                                                    cssClass: "button-margin btn-danger text-white text-decoration-none"
-                                                }
-                                            ]
-                                        }
                                     ],
                                     showBorders: true,
                                     height: 150,
+                                    paging: { pageSize: 5 },
+                                    sorting: { mode: "multiple" },
+                                    rowAlternationEnabled: true,
+                                    masterDetail: {
+                                        enabled: true,
+                                        template: function (container, options) {
+                                            // Personalize o conteúdo dos detalhes aqui, se necessário
+                                        }
+                                    }
                                 }).appendTo(container);
                         } else {
-                            $("<div>No addresses available</div>").appendTo(container);
+                            $("<div>Não há endereços disponíveis</div>").appendTo(container);
                         }
                     }
+                },
+                showBorders: true,
+                columnAutoWidth: true,
+                rowAlternationEnabled: true,
+                headerFilter: {
+                    visible: true
+                },
+                summary: {
+                    totalItems: [{
+                        column: "Id",
+                        summaryType: "count",
+                        displayFormat: "Total: {0}"
+                    }]
                 }
             });
         });
@@ -145,4 +142,56 @@
             .button-custom:hover {
                 background-color: #0056b3;
             }
+
+    /* Estilos personalizados para o grid */
+    .dx-datagrid {
+        font-family: Arial, sans-serif;
+    }
+
+    /* Estilo dos cabeçalhos do grid */
+    .dx-datagrid-header-row {
+        background-color: #007bff; /* Azul */
+        color: white;
+    }
+
+    /* Estilo das linhas alternadas do grid */
+    .dx-datagrid-content tr:nth-child(even) {
+        background-color: #f8f9fa; /* Cinza claro */
+    }
+
+    .dx-datagrid-content tr:nth-child(odd) {
+        background-color: #ffffff; /* Branco */
+    }
+
+    /* Estilo para linhas de detalhes do master-detail */
+    .dx-datagrid-master-detail {
+        background-color: #e9ecef; /* Cinza mais escuro */
+    }
+
+    /* Estilo dos botões */
+    .button-custom {
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    /* Estilos para botões */
+    .btn-primary {
+        border-color: #28a745;
+    }
+
+    .btn-danger {
+        background-color: #dc3545; /* Vermelho */
+        border-color: #dc3545;
+    }
+
+    /* Hover effect for buttons */
+    .btn-primary:hover {
+        border-color: #1e7e34;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
     </style>

@@ -1,75 +1,109 @@
 ﻿@model CustomerRegistrySystem.Models.EditCustomerViewModel
 
-<div class="container mt-4">
-    <h2>Editar Cliente</h2>
+<h1>Editar Cliente</h1>
 
-    <form asp-action="Edit" method="post">
-        <input type="hidden" asp-for="Id" />
+<form id="editCustomerForm" asp-action="Edit" method="post">
+    <div class="form-group">
+        <label for="Name">Nome</label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Email">Email</label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Phone">Telefone</label>
+        <input asp-for="Phone" class="form-control" />
+    </div>
 
-        <div class="mb-3">
-            <label asp-for="Name" class="form-label"></label>
-            <input asp-for="Name" class="form-control" />
-            <span asp-validation-for="Name" class="text-danger"></span>
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="Email" class="form-label"></label>
-            <input asp-for="Email" class="form-control" />
-            <span asp-validation-for="Email" class="text-danger"></span>
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="Phone" class="form-label"></label>
-            <input asp-for="Phone" class="form-control" />
-            <span asp-validation-for="Phone" class="text-danger"></span>
-        </div>
-
-        <h4>Endereços</h4>
-        @for (int i = 0; i < Model.Addresses.Count; i++)
+    <h3>Endereços</h3>
+    <div id="addressContainer">
+        @for (var i = 0; i < Model.Addresses.Count; i++)
         {
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Endereço @(i + 1)</h5> <!-- Número do endereço -->
-                    <input type="hidden" asp-for="Addresses[i].Id" />
-
-                    <div class="mb-3">
-                        <label asp-for="Addresses[i].Street" class="form-label"></label>
-                        <input asp-for="Addresses[i].Street" class="form-control" />
-                        <span asp-validation-for="Addresses[i].Street" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Addresses[i].City" class="form-label"></label>
-                        <input asp-for="Addresses[i].City" class="form-control" />
-                        <span asp-validation-for="Addresses[i].City" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Addresses[i].State" class="form-label"></label>
-                        <input asp-for="Addresses[i].State" class="form-control" />
-                        <span asp-validation-for="Addresses[i].State" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Addresses[i].CEP" class="form-label"></label>
-                        <input asp-for="Addresses[i].CEP" class="form-control" />
-                        <span asp-validation-for="Addresses[i].CEP" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Addresses[i].Type" class="form-label"></label>
-                        <select asp-for="Addresses[i].Type" class="form-select">
-                            <option value="0">Fiscal</option>
-                            <option value="1">Cobrança</option>
-                            <option value="2">Entrega</option>
-                        </select>
-                        <span asp-validation-for="Addresses[i].Type" class="text-danger"></span>
-                    </div>
-                </div>
+            <div class="address-group mb-3">
+                <h4>Endereço @(i + 1)</h4>
+                <label class="form-label">Rua</label>
+                <input type="text" class="form-control" name="Addresses[@i].Street" value="@Model.Addresses[i].Street" required>
+                <label class="form-label">Cidade</label>
+                <input type="text" class="form-control" name="Addresses[@i].City" value="@Model.Addresses[i].City" required>
+                <label class="form-label">Estado</label>
+                <input type="text" class="form-control" name="Addresses[@i].State" value="@Model.Addresses[i].State" required>
+                <label class="form-label">CEP</label>
+                <input type="text" class="form-control" name="Addresses[@i].CEP" value="@Model.Addresses[i].CEP" required>
+                <label class="form-label">Complemento</label>
+                <input type="text" class="form-control" name="Addresses[@i].Complement" value="@Model.Addresses[i].Complement">
+                <label class="form-label">Tipo</label>
+                <select class="form-select" name="Addresses[@i].Type">
+                    <option value="Fiscal" >Fiscal</option>
+                    <option value="Cobrança">Cobrança</option>
+                    <option value="Entrega">Entrega</option>
+                </select>
+                <button type="button" class="btn btn-danger" onclick="removeAddress(this)">Remover</button>
             </div>
         }
+    </div>
 
-        <button type="submit" class="btn btn-primary">Atualizar</button>
-        <a asp-action="Show" class="btn btn-secondary">Cancelar</a>
-    </form>
-</div>
+    <button type="button" id="addAddressButton" class="btn btn-primary">Adicionar Endereço</button>
+    <button type="submit" class="btn btn-success">Salvar</button>
+</form>
+
+@section Scripts {
+    <script>
+        let addressCount = @Model.Addresses.Count; // Conta os endereços já existentes
+
+        document.getElementById("addAddressButton").addEventListener("click", function () {
+            addressCount++;
+            const addressContainer = document.getElementById("addressContainer");
+            const newAddressGroup = document.createElement("div");
+            newAddressGroup.classList.add("address-group", "mb-3");
+            newAddressGroup.innerHTML = `
+                <h4>Endereço ${addressCount}</h4>
+                <label class="form-label">Rua</label>
+                <input type="text" class="form-control" name="Addresses[${addressCount - 1}].Street" required>
+                <label class="form-label">Cidade</label>
+                <input type="text" class="form-control" name="Addresses[${addressCount - 1}].City" required>
+                <label class="form-label">Estado</label>
+                <input type="text" class="form-control" name="Addresses[${addressCount - 1}].State" required>
+                <label class="form-label">CEP</label>
+                <input type="text" class="form-control" name="Addresses[${addressCount - 1}].CEP" required>
+                <label class="form-label">Complemento</label>
+                <input type="text" class="form-control" name="Addresses[${addressCount - 1}].Complement">
+                <label class="form-label">Tipo</label>
+                <select class="form-select" name="Addresses[${addressCount - 1}].Type">
+                    <option value="Fiscal">Fiscal</option>
+                    <option value="Cobrança">Cobrança</option>
+                    <option value="Entrega">Entrega</option>
+                </select>
+            `;
+            addressContainer.appendChild(newAddressGroup);
+        });
+
+        function removeAddress(button) {
+            const addressGroup = button.parentNode;
+            addressGroup.parentNode.removeChild(addressGroup); // Remove o endereço do DOM
+        }
+
+        // Enviar o formulário usando AJAX
+        document.getElementById("editCustomerForm").addEventListener("submit", function (event) {
+            event.preventDefault(); // Impede o envio normal do formulário
+            const formData = new FormData(this); // Cria um FormData com os dados do formulário
+            fetch(this.action, {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao editar o cliente');
+                }
+                return response.text(); // Retorna a resposta em texto
+            })
+            .then(data => {
+                alert('Cliente editado com sucesso!'); // Mensagem de sucesso
+                location.reload(); // Recarrega a página para atualizar os dados
+            })
+            .catch(error => {
+                alert('Erro ao editar o cliente: ' + error.message); // Mensagem de erro
+            });
+        });
+    </script>
+}
