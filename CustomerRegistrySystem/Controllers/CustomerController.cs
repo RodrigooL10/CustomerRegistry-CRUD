@@ -44,25 +44,65 @@ namespace CustomerRegistrySystem.Controllers
                 Name = addCustomerRequest.Name,
                 Email = addCustomerRequest.Email,
                 Phone = addCustomerRequest.Phone,
-
-                //adicionando Endereços
-                Addresses = addCustomerRequest.Addresses.Select(address => new Address
-                {
-                    Id = Guid.NewGuid(),
-                    Street = address.Street,
-                    City = address.City,
-                    State = address.State,
-                    CEP = address.CEP,
-                    Complement = address.Complement,
-                    Type = address.Type,
-                }).ToList()
             };
 
             await customerRegistryDBContext.Customers.AddAsync(customer);
             await customerRegistryDBContext.SaveChangesAsync();
 
-            return RedirectToAction("Show");
+            return RedirectToAction("AddAddress", new { customerId = customer.Id});
         }
+
+
+
+        //Adicionar Endereço
+        [HttpGet]
+        public async Task<IActionResult> AddAddress(Guid customerId)
+        {
+            var model = new AddAddressViewModel
+            {
+               Id = customerId // Vincula o cliente ao endereço
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddAddress(AddAddressViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    // Lógica para salvar o endereço
+                    var address = new Address
+                    {
+                        Id = model.Id,
+                        Street = model.Street,
+                        City = model.City,
+                        State = model.State,
+                        CEP = model.CEP,
+                        Complement = model.Complement,
+                        Type = model.Type,
+                        CustomerId = model.CustomerId // Certifique-se de que o CustomerId esteja sendo enviado e salvo
+                    };
+
+                    await customerRegistryDBContext.AddAsync(address); // Supondo que _context seja seu DbContext
+                    await customerRegistryDBContext.SaveChangesAsync();
+
+                    return Json(new { success = true });
+                }
+                catch (Exception ex)
+                {
+                    // Logar a exceção
+                    // Você pode usar um logger para registrar detalhes do erro
+                    return Json(new { success = false, error = ex.Message });
+                }
+            }
+
+            return Json(new { success = false });
+        }
+
+
+
 
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
@@ -99,18 +139,20 @@ namespace CustomerRegistrySystem.Controllers
             return RedirectToAction("Show");
         }
 
+
+
+
         [HttpPost]
         public async Task<IActionResult> Edit(EditCustomerViewModel viewModel)
         {
             try
             {
                 var customer = await customerRegistryDBContext.Customers
-                    .Include(c => c.Addresses)
                     .FirstOrDefaultAsync(x => x.Id == viewModel.Id);
 
                 if (customer == null)
                 {
-                    return NotFound(); // Retorna um erro 404 se o cliente não for encontrado
+                    return NotFound(); // Cliente não encontrado
                 }
 
                 // Atualiza os dados do cliente
@@ -118,85 +160,12 @@ namespace CustomerRegistrySystem.Controllers
                 customer.Email = viewModel.Email;
                 customer.Phone = viewModel.Phone;
 
-                // Armazena os endereços existentes em um dicionário
-                var existingAddresses = customer.Addresses.ToDictionary(a => a.Id);
-
-                // Lista para armazenar novos endereços
-                var newAddresses = new List<Address>();
-
-                foreach (var addressModel in viewModel.Addresses)
-                {
-                    if (addressModel.Id == Guid.Empty) // Verifica se o ID é vazio
-                    {
-                        // Adiciona novos endereços
-                        var newAddress = new Address
-                        {
-                            Id = Guid.NewGuid(), // Gera um novo GUID
-                            Street = addressModel.Street,
-                            City = addressModel.City,
-                            State = addressModel.State,
-                            CEP = addressModel.CEP,
-                            Complement = addressModel.Complement,
-                            Type = addressModel.Type
-                        };
-
-                        newAddresses.Add(newAddress); // Adiciona à lista de novos endereços
-                    }
-                    else
-                    {
-                        // Atualiza endereços existentes
-                        if (existingAddresses.TryGetValue(addressModel.Id, out var existingAddress))
-                        {
-                            existingAddress.Street = addressModel.Street;
-                            existingAddress.City = addressModel.City;
-                            existingAddress.State = addressModel.State;
-                            existingAddress.CEP = addressModel.CEP;
-                            existingAddress.Complement = addressModel.Complement;
-                            existingAddress.Type = addressModel.Type;
-                        }
-                        else
-                        {
-                            // Adiciona novo endereço se não estiver no dicionário
-                            newAddresses.Add(new Address
-                            {
-                                Id = addressModel.Id,
-                                Street = addressModel.Street,
-                                City = addressModel.City,
-                                State = addressModel.State,
-                                CEP = addressModel.CEP,
-                                Complement = addressModel.Complement,
-                                Type = addressModel.Type
-                            });
-                        }
-                    }
-                }
-
-                // Adiciona novos endereços à lista de endereços do cliente
-                foreach (var newAddress in newAddresses)
-                {
-                    customer.Addresses.Add(newAddress);
-                }
-
-                // Remove endereços que não estão mais na lista de endereços do viewModel
-                var addressesToRemove = customer.Addresses
-                    .Where(a => !viewModel.Addresses.Any(am => am.Id == a.Id))
-                    .ToList();
-
-                foreach (var address in addressesToRemove)
-                {
-                    customer.Addresses.Remove(address);
-                    customerRegistryDBContext.Addresses.Remove(address); // Remover também do banco
-                }
-
                 await customerRegistryDBContext.SaveChangesAsync();
-
                 return RedirectToAction("Show");
             }
             catch (Exception ex)
             {
-                // Logue a exceção para ajudar no diagnóstico
                 Console.WriteLine($"Erro: {ex.Message}");
-                // Retorna a mesma view para que o usuário possa tentar novamente
                 return View(viewModel);
             }
         }
@@ -205,8 +174,73 @@ namespace CustomerRegistrySystem.Controllers
 
 
 
+        //Editar Endereço
+        [HttpGet]
+        [Route("Customer/EditAddress/{addressId}")]
+        public async Task<IActionResult> EditAddress(Guid addressId)
+        {
+            Console.WriteLine($"Received addressId: {addressId}");
 
-        //Deleta cliente
+            if (addressId == Guid.Empty)
+            {
+                // Isso indica que o addressId não está sendo passado corretamente
+                return NotFound("Endereço não encontrado 1.");
+            }
+
+            var address = await customerRegistryDBContext.Addresses
+                .FirstOrDefaultAsync(a => a.Id == addressId);
+
+            if (address == null)
+            {
+                return NotFound("Endereço não encontrado 2.");
+            }
+
+            var model = new EditAddressViewModel
+            {
+                Id = address.Id,
+                Street = address.Street,
+                City = address.City,
+                State = address.State,
+                CEP = address.CEP,
+                Complement = address.Complement,
+                Type = address.Type
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditAddress(EditAddressViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var address = customerRegistryDBContext.Addresses
+                                      .FirstOrDefault(a => a.Id == model.Id);
+
+                if (address == null)
+                {
+                    return NotFound();
+                }
+
+                address.Street = model.Street;
+                address.City = model.City;
+                address.State = model.State;
+                address.CEP = model.CEP;
+                address.Complement = model.Complement;
+                address.Type = model.Type;
+
+                await customerRegistryDBContext.SaveChangesAsync();
+                return RedirectToAction("Show");
+            }
+
+            return View(model);
+        }
+
+
+
+
+
+        //Deletar cliente
         [HttpPost]
         public async Task<IActionResult> Delete(EditCustomerViewModel viewModel)
         {
@@ -222,7 +256,7 @@ namespace CustomerRegistrySystem.Controllers
             return NotFound();
         }
 
-        //Deleta Endereço
+
         [HttpPost]
         public async Task<IActionResult> DeleteAddress(Guid id)
         {
@@ -233,10 +267,11 @@ namespace CustomerRegistrySystem.Controllers
                 customerRegistryDBContext.Addresses.Remove(address);
                 await customerRegistryDBContext.SaveChangesAsync();
 
-                return Ok(); // Retorna uma resposta de sucesso
+                return Ok(); // Endereço removido com sucesso
             }
 
-            return NotFound(); // Retorna 404 se o endereço não for encontrado
+            return NotFound(); // Endereço não encontrado
         }
+
     }
 }

@@ -10,138 +10,170 @@
 <div id="gridCustomers"></div>
 
 @section Scripts {
-    <script>
-        $(function () {
-            const data = @Html.Raw(Json.Serialize(Model));
-            const customers = data.$values;
+        <script>
+            $(function () {
+                const data = @Html.Raw(Json.Serialize(Model));
+                const customers = data.$values;
 
-            $("#gridCustomers").dxDataGrid({
-                dataSource: customers,
-                columns: [
-                    { dataField: "Id", caption: "ID"},
-                    { dataField: "Name", caption: "Nome"},
-                    { dataField: "Email", caption: "Email"},
-                    { dataField: "Phone", caption: "Telefone"},
-                    {
-                        type: "buttons",
-                        buttons: [
-                            {
-                                text: "Editar",
-                                onClick: function (e) {
-                                    const id = e.row.data.Id;
-                                    window.location.href = `/Customer/Edit/${id}`;
+                $("#gridCustomers").dxDataGrid({
+                    dataSource: customers,
+                    columns: [
+                        { dataField: "Id", caption: "ID" },
+                        { dataField: "Name", caption: "Nome" },
+                        { dataField: "Email", caption: "Email" },
+                        { dataField: "Phone", caption: "Telefone" },
+                        {
+                            type: "buttons",
+                            buttons: [
+                                {
+                                    text: "Editar Cliente",
+                                    onClick: function (e) {
+                                        const id = e.row.data.Id;
+                                        window.location.href = `/Customer/Edit/${id}`;
+                                    },
+                                    cssClass: "btn btn-primary mx-1 button-custom text-white text-decoration-none"
                                 },
-                                cssClass: "btn btn-primary mx-1 button-custom text-white text-decoration-none"
-                            },
-                            {
-                                text: "Deletar",
-                                onClick: function (e) {
-                                    const id = e.row.data.Id;
-                                    if (confirm("Tem certeza de que deseja deletar este cliente?")) {
-                                        $.ajax({
-                                            url: `/Customer/Delete/${id}`,
-                                            type: "POST",
-                                            success: function () {
-                                                $("#gridCustomers").dxDataGrid("instance").refresh();
-                                            },
-                                            error: function () {
-                                                alert("Erro ao deletar o cliente");
-                                            }
-                                        });
-                                    }
-                                },
-                                cssClass: "btn btn-danger mx-1 button-custom text-white text-decoration-none"
-                            }
-                        ]
-                    }
-                ],
-                paging: { pageSize: 10 },
-                height: 700,
-                sorting: { mode: "multiple" },
-                searchPanel: { visible: true, placeholder: "Pesquisar..." },
-                filterRow: { visible: true, applyFilter: "auto" },
-                masterDetail: {
-                    enabled: true,
-                    template: function (container, options) {
-                        var customer = options.data;
-
-                        if (customer.Addresses && customer.Addresses.$values && Array.isArray(customer.Addresses.$values)) {
-                            $("<div>")
-                                .dxDataGrid({
-                                    dataSource: customer.Addresses.$values,
-                                    columns: [
-                                        { dataField: "Street", caption: "Rua" },
-                                        { dataField: "City", caption: "Cidade" },
-                                        { dataField: "State", caption: "Estado" },
-                                        { dataField: "CEP", caption: "CEP" },
-                                        { dataField: "Complement", caption: "Complemento" },
-                                        {
-                                            dataField: "Type",
-                                            caption: "Tipo de Endereço",
-                                            calculateDisplayValue: function (data) {
-                                                switch (data.Type) {
-                                                    case 0: return "Fiscal";
-                                                    case 1: return "Cobrança";
-                                                    case 2: return "Entrega";
-                                                    default: return "Desconhecido";
+                                {
+                                    text: "Deletar Cliente",
+                                    onClick: function (e) {
+                                        const id = e.row.data.Id;
+                                        if (confirm("Tem certeza de que deseja deletar este cliente?")) {
+                                            $.ajax({
+                                                url: `/Customer/Delete/${id}`,
+                                                type: "POST",
+                                                success: function () {
+                                                    location.reload();                                                },
+                                                error: function () {
+                                                    alert("Erro ao deletar o cliente");
                                                 }
-                                            }
-                                        },
-                                    ],
-                                    showBorders: true,
-                                    height: 150,
-                                    paging: { pageSize: 5 },
-                                    sorting: { mode: "multiple" },
-                                    rowAlternationEnabled: true,
-                                    masterDetail: {
-                                        enabled: true,
-                                        template: function (container, options) {
-                                            // Personalize o conteúdo dos detalhes aqui, se necessário
+                                            });
                                         }
-                                    }
-                                }).appendTo(container);
-                        } else {
-                            $("<div>Não há endereços disponíveis</div>").appendTo(container);
+                                    },
+                                    cssClass: "btn btn-danger mx-1 button-custom text-white text-decoration-none"
+                                }
+                            ]
                         }
+                    ],
+                    paging: { pageSize: 10 },
+                    height: 700,
+                    sorting: { mode: "multiple" },
+                    searchPanel: { visible: true, placeholder: "Pesquisar..." },
+                    filterRow: { visible: true, applyFilter: "auto" },
+                    masterDetail: {
+                        enabled: true,
+                        template: function (container, options) {
+                            var customer = options.data;
+
+                            if (customer.Addresses && customer.Addresses.$values && Array.isArray(customer.Addresses.$values)) {
+                                $("<div>")
+                                    .dxDataGrid({
+                                        dataSource: customer.Addresses.$values,
+                                        columns: [
+                                            { dataField: "Street", caption: "Rua" },
+                                            { dataField: "City", caption: "Cidade" },
+                                            { dataField: "State", caption: "Estado" },
+                                            { dataField: "CEP", caption: "CEP" },
+                                            { dataField: "Complement", caption: "Complemento" },
+                                            {
+                                                dataField: "Type",
+                                                caption: "Tipo de Endereço",
+                                                calculateDisplayValue: function (data) {
+                                                    switch (data.Type) {
+                                                        case 0: return "Fiscal";
+                                                        case 1: return "Cobrança";
+                                                        case 2: return "Entrega";
+                                                        default: return "Desconhecido";
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                type: "buttons",
+                                                buttons: [
+                                                    {
+                                                    text: "Editar Endereço",
+                                                    onClick: function (e) {
+                                                        console.log("Row Data:", e.row.data); // Inspecione o objeto para verificar a estrutura
+                                                        const addressId = e.row.data.Id;
+                                                        sessionStorage.setItem('addressId', addressId)
+                                                        console.log("Address ID:", addressId);
+
+                                                        const id = sessionStorage.getItem('addressId');
+                                                        console.log("Redirecting to:", `/Customer/EditAddress/${id}`); // Confirme a URL
+                                                        window.location.href = `/Customer/EditAddress/${id}`;
+
+                                                    },
+                                                        cssClass: "btn btn-warning mx-1 button-custom text-white text-decoration-none"
+                                                    },
+                                                    {
+                                                        text: "Excluir Endereço",
+                                                        onClick: function (e) {
+                                                            const addressId = e.row.data.Id;
+                                                            if (confirm("Tem certeza de que deseja deletar este endereço?")) {
+                                                                $.ajax({
+                                                                        url: `/Customer/DeleteAddress/${addressId}`,
+                                                                    type: "POST",
+                                                                    success: function () {
+                                                                        location.reload();
+                                                                    },
+                                                                    error: function () {
+                                                                        alert("Erro ao deletar o endereço");
+                                                                    }
+                                                                });
+                                                            }
+                                                        },
+                                                        cssClass: "btn btn-danger mx-1 button-custom text-white text-decoration-none"
+                                                    }
+                                                ]
+                                            }
+                                        ],
+                                        showBorders: true,
+                                        height: 150,
+                                        paging: { pageSize: 5 },
+                                        sorting: { mode: "multiple" },
+                                        rowAlternationEnabled: true
+                                    }).appendTo(container);
+                            } else {
+                                $("<div>Não há endereços disponíveis</div>").appendTo(container);
+                            }
+                        }
+                    },
+                    showBorders: true,
+                    columnAutoWidth: true,
+                    rowAlternationEnabled: true,
+                    headerFilter: {
+                        visible: true
+                    },
+                    summary: {
+                        totalItems: [{
+                            column: "Id",
+                            summaryType: "count",
+                            displayFormat: "Total: {0}"
+                        }]
                     }
-                },
-                showBorders: true,
-                columnAutoWidth: true,
-                rowAlternationEnabled: true,
-                headerFilter: {
-                    visible: true
-                },
-                summary: {
-                    totalItems: [{
-                        column: "Id",
-                        summaryType: "count",
-                        displayFormat: "Total: {0}"
-                    }]
-                }
+                });
             });
-        });
-    </script>
+        </script>
 }
 
-    <style>
-        .button-margin {
-            margin-right: 10px;
-            text-decoration: none;
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 5px;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
+<style>
+    .button-margin {
+        margin-right: 10px;
+        text-decoration: none;
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 5px;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
 
-        .button-custom {
-            background-color: #007bff;
-        }
+    .button-custom {
+        background-color: #007bff;
+    }
 
-            .button-custom:hover {
-                background-color: #0056b3;
-            }
+    .button-custom:hover {
+        background-color: #0056b3;
+    }
 
     /* Estilos personalizados para o grid */
     .dx-datagrid {
@@ -194,4 +226,4 @@
         background-color: #c82333;
         border-color: #bd2130;
     }
-    </style>
+</style>

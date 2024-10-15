@@ -1,0 +1,107 @@
+﻿@model CustomerRegistrySystem.Models.AddAddressViewModel
+
+<h1>Adicionar Endereço</h1>
+
+<form id="addAddressForm" asp-action="AddAddress" method="post">
+    <input type="hidden" asp-for="CustomerId" id="customerId" />
+    <div class="form-group">
+        <label>Rua</label>
+        <input asp-for="Street" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Cidade</label>
+        <input asp-for="City" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Estado</label>
+        <input asp-for="State" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>CEP</label>
+        <input asp-for="CEP" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Complemento</label>
+        <input asp-for="Complement" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Tipo</label>
+        <select asp-for="Type" class="form-select">
+            <option value="Fiscal">Fiscal</option>
+            <option value="Cobrança">Cobrança</option>
+            <option value="Entrega">Entrega</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-success">Salvar</button>
+</form>
+
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Adicionar Mais Um Endereço?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Deseja adicionar mais um endereço para este cliente?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="addMoreAddressBtn">Sim</button>
+                <button type="button" class="btn btn-secondary" id="goToShowBtn">Não</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#addAddressForm').on('submit', function (e) {
+                e.preventDefault(); // Evita o comportamento padrão do formulário
+
+                var form = $(this);
+                var customerId = $('#customerId').val(); // Obter o CustomerId antes de enviar
+                console.log("Customer ID antes de salvar:", customerId); // Log para depuração
+
+                sessionStorage.setItem('customerId', customerId); // Salvar no sessionStorage
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: form.serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            // Mostrar o modal após salvar o endereço
+                            $('#confirmationModal').modal('show');
+                        } else {
+                            alert("Erro ao salvar o endereço. Tente novamente.");
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error occurred:", error);
+                        alert("Erro ao salvar o endereço. Tente novamente.");
+                    }
+                });
+            });
+
+            // Ação do botão "Sim"
+            $('#addMoreAddressBtn').click(function () {
+                var customerId = sessionStorage.getItem('customerId'); // Obtenha o CustomerId do sessionStorage
+                console.log("Customer ID ao clicar em Sim:", customerId); // Log para depuração
+
+                if (customerId) {
+                    window.location.href = '/Customer/AddAddress?customerId=' + customerId;
+                } else {
+                    alert("ID do cliente não encontrado.");
+                }
+            });
+
+            // Ação do botão "Não"
+            $('#goToShowBtn').click(function () {
+                sessionStorage.clear(); //limpa o sessionStorage
+                window.location.href = '/Customer/Show';
+            });
+        });
+    </script>
+}

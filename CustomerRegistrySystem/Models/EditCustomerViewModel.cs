@@ -23,5 +23,7 @@ namespace CustomerRegistrySystem.Models
         public string CEP { get; set; }
         public string Complement { get; set; }
         public AddressType Type { get; set; }
+        public Guid CustomerId { get; set; }
+
     }
 }
