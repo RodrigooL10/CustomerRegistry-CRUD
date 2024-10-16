@@ -36,18 +36,41 @@
     <button type="submit" class="btn btn-success">Salvar</button>
 </form>
 
-<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<!-- Modal de sucesso -->
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalLabel">Adicionar Mais Um Endereço?</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title" id="successModalLabel">Sucesso</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
-                Deseja adicionar mais um endereço para este cliente?
+                Endereço cadastrado com sucesso!
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="addMoreAddressBtn">Sim</button>
+                <button type="button" class="btn btn-primary" id="proceedToNextModal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmação para adicionar outro endereço -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">Adicionar outro endereço?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Deseja adicionar outro endereço para este cliente?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="addMoreAddressBtn">Sim</button>
                 <button type="button" class="btn btn-secondary" id="goToShowBtn">Não</button>
             </div>
         </div>
@@ -57,14 +80,31 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
+            // Verifica se o customerId está no sessionStorage ou na URL
+            var customerId = sessionStorage.getItem('customerId');
+            if (!customerId) {
+                var urlParams = new URLSearchParams(window.location.search);
+                customerId = urlParams.get('customerId');
+
+                if (customerId) {
+                    sessionStorage.setItem('customerId', customerId);
+                    $('#customerId').val(customerId);
+                }
+            } else {
+                $('#customerId').val(customerId);
+            }
+
+            console.log("Customer ID na chegada:", customerId);
+
+            // Lógica para salvar o endereço
             $('#addAddressForm').on('submit', function (e) {
-                e.preventDefault(); // Evita o comportamento padrão do formulário
+                e.preventDefault();
 
                 var form = $(this);
-                var customerId = $('#customerId').val(); // Obter o CustomerId antes de enviar
-                console.log("Customer ID antes de salvar:", customerId); // Log para depuração
+                var customerId = $('#customerId').val();
+                console.log("Customer ID antes de salvar:", customerId);
 
-                sessionStorage.setItem('customerId', customerId); // Salvar no sessionStorage
+                sessionStorage.setItem('customerId', customerId);
 
                 $.ajax({
                     url: form.attr('action'),
@@ -72,8 +112,8 @@
                     data: form.serialize(),
                     success: function (response) {
                         if (response.success) {
-                            // Mostrar o modal após salvar o endereço
-                            $('#confirmationModal').modal('show');
+                            // Exibe o modal de sucesso
+                            $('#successModal').modal('show');
                         } else {
                             alert("Erro ao salvar o endereço. Tente novamente.");
                         }
@@ -85,11 +125,15 @@
                 });
             });
 
+            // Quando o modal de sucesso for fechado, exibe o próximo modal
+            $('#proceedToNextModal').click(function () {
+                $('#successModal').modal('hide');
+                $('#confirmationModal').modal('show');
+            });
+
             // Ação do botão "Sim"
             $('#addMoreAddressBtn').click(function () {
-                var customerId = sessionStorage.getItem('customerId'); // Obtenha o CustomerId do sessionStorage
-                console.log("Customer ID ao clicar em Sim:", customerId); // Log para depuração
-
+                var customerId = sessionStorage.getItem('customerId');
                 if (customerId) {
                     window.location.href = '/Customer/AddAddress?customerId=' + customerId;
                 } else {
@@ -99,7 +143,7 @@
 
             // Ação do botão "Não"
             $('#goToShowBtn').click(function () {
-                sessionStorage.clear(); //limpa o sessionStorage
+                sessionStorage.clear();
                 window.location.href = '/Customer/Show';
             });
         });

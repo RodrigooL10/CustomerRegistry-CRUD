@@ -9,150 +9,256 @@
 
 <div id="gridCustomers"></div>
 
+<!-- Modal para confirmação de exclusão de cliente -->
+<div class="modal fade" id="deleteCustomerModal" tabindex="-1" role="dialog" aria-labelledby="deleteCustomerModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteCustomerModalLabel">Confirmar Exclusão de Cliente</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Tem certeza de que deseja excluir este cliente? Esta ação não pode ser desfeita.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteCustomer">Excluir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para confirmação de exclusão de endereço -->
+<div class="modal fade" id="deleteAddressModal" tabindex="-1" role="dialog" aria-labelledby="deleteAddressModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAddressModalLabel">Confirmar Exclusão de Endereço</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Tem certeza de que deseja excluir este endereço? Esta ação não pode ser desfeita.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteAddress">Excluir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para confirmação de sucesso -->
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Operação bem-sucedida</h5>
+                <button type="button" class="close" data-dismiss="modal" onclick="location.reload()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Excluído com sucesso!
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="location.reload()">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
 @section Scripts {
-        <script>
-            $(function () {
-                const data = @Html.Raw(Json.Serialize(Model));
-                const customers = data.$values;
+    <script>
+        $(function () {
+            const data = @Html.Raw(Json.Serialize(Model));
+            const customers = data.$values;
+            let customerToDelete = null;
+            let addressToDelete = null;
 
-                $("#gridCustomers").dxDataGrid({
-                    dataSource: customers,
-                    columns: [
-                        { dataField: "Id", caption: "ID" },
-                        { dataField: "Name", caption: "Nome" },
-                        { dataField: "Email", caption: "Email" },
-                        { dataField: "Phone", caption: "Telefone" },
-                        {
-                            type: "buttons",
-                            buttons: [
-                                {
-                                    text: "Editar Cliente",
-                                    onClick: function (e) {
-                                        const id = e.row.data.Id;
-                                        window.location.href = `/Customer/Edit/${id}`;
-                                    },
-                                    cssClass: "btn btn-primary mx-1 button-custom text-white text-decoration-none"
+            $("#gridCustomers").dxDataGrid({
+                dataSource: customers,
+                columns: [
+                    { dataField: "Id", caption: "ID" },
+                    { dataField: "Name", caption: "Nome" },
+                    { dataField: "Email", caption: "Email" },
+                    { dataField: "Phone", caption: "Telefone" },
+                    {
+                        type: "buttons",
+                        buttons: [
+                            {
+                                text: "Editar Cliente",
+                                onClick: function (e) {
+                                    const id = e.row.data.Id;
+                                    window.location.href = `/Customer/Edit/${id}`;
                                 },
-                                {
-                                    text: "Deletar Cliente",
-                                    onClick: function (e) {
-                                        const id = e.row.data.Id;
-                                        if (confirm("Tem certeza de que deseja deletar este cliente?")) {
-                                            $.ajax({
-                                                url: `/Customer/Delete/${id}`,
-                                                type: "POST",
-                                                success: function () {
-                                                    location.reload();                                                },
-                                                error: function () {
-                                                    alert("Erro ao deletar o cliente");
-                                                }
-                                            });
-                                        }
-                                    },
-                                    cssClass: "btn btn-danger mx-1 button-custom text-white text-decoration-none"
-                                }
-                            ]
-                        }
-                    ],
-                    paging: { pageSize: 10 },
-                    height: 700,
-                    sorting: { mode: "multiple" },
-                    searchPanel: { visible: true, placeholder: "Pesquisar..." },
-                    filterRow: { visible: true, applyFilter: "auto" },
-                    masterDetail: {
-                        enabled: true,
-                        template: function (container, options) {
-                            var customer = options.data;
+                                cssClass: "btn btn-primary mx-1 button-custom text-white text-decoration-none"
+                            },
+                            {
+                                text: "Deletar Cliente",
+                                onClick: function (e) {
+                                    customerToDelete = e.row.data.Id; // Armazena o ID do cliente a ser deletado
+                                    $('#deleteCustomerModal').modal('show'); // Exibe o modal de confirmação
+                                },
+                                cssClass: "btn btn-danger mx-1 button-custom text-white text-decoration-none"
+                            }
+                        ]
+                    }
+                ],
+                paging: { pageSize: 10 },
+                height: 700,
+                sorting: { mode: "multiple" },
+                searchPanel: { visible: true, placeholder: "Pesquisar..." },
+                filterRow: { visible: true, applyFilter: "auto" },
+                masterDetail: {
+                    enabled: true,
+                    template: function (container, options) {
+                        var customer = options.data;
 
-                            if (customer.Addresses && customer.Addresses.$values && Array.isArray(customer.Addresses.$values)) {
-                                $("<div>")
-                                    .dxDataGrid({
-                                        dataSource: customer.Addresses.$values,
-                                        columns: [
-                                            { dataField: "Street", caption: "Rua" },
-                                            { dataField: "City", caption: "Cidade" },
-                                            { dataField: "State", caption: "Estado" },
-                                            { dataField: "CEP", caption: "CEP" },
-                                            { dataField: "Complement", caption: "Complemento" },
-                                            {
-                                                dataField: "Type",
-                                                caption: "Tipo de Endereço",
-                                                calculateDisplayValue: function (data) {
-                                                    switch (data.Type) {
-                                                        case 0: return "Fiscal";
-                                                        case 1: return "Cobrança";
-                                                        case 2: return "Entrega";
-                                                        default: return "Desconhecido";
-                                                    }
+                        // Cria o grid para exibir os endereços do cliente, se houver
+                        if (customer.Addresses && customer.Addresses.$values && Array.isArray(customer.Addresses.$values)) {
+                            $("<div>")
+                                .dxDataGrid({
+                                    dataSource: customer.Addresses.$values,
+                                    columns: [
+                                        { dataField: "Street", caption: "Rua" },
+                                        { dataField: "City", caption: "Cidade" },
+                                        { dataField: "State", caption: "Estado" },
+                                        { dataField: "CEP", caption: "CEP" },
+                                        { dataField: "Complement", caption: "Complemento" },
+                                        {
+                                            dataField: "Type",
+                                            caption: "Tipo de Endereço",
+                                            calculateDisplayValue: function (data) {
+                                                switch (data.Type) {
+                                                    case 0: return "Fiscal";
+                                                    case 1: return "Cobrança";
+                                                    case 2: return "Entrega";
+                                                    default: return "Desconhecido";
                                                 }
-                                            },
-                                            {
-                                                type: "buttons",
-                                                buttons: [
-                                                    {
+                                            }
+                                        },
+                                        {
+                                            type: "buttons",
+                                            buttons: [
+                                                {
                                                     text: "Editar Endereço",
                                                     onClick: function (e) {
-                                                        console.log("Row Data:", e.row.data); // Inspecione o objeto para verificar a estrutura
                                                         const addressId = e.row.data.Id;
-                                                        sessionStorage.setItem('addressId', addressId)
-                                                        console.log("Address ID:", addressId);
-
-                                                        const id = sessionStorage.getItem('addressId');
-                                                        console.log("Redirecting to:", `/Customer/EditAddress/${id}`); // Confirme a URL
-                                                        window.location.href = `/Customer/EditAddress/${id}`;
-
+                                                        window.location.href = `/Customer/EditAddress/${addressId}`;
                                                     },
-                                                        cssClass: "btn btn-warning mx-1 button-custom text-white text-decoration-none"
+                                                    cssClass: "btn btn-warning mx-1 button-custom text-white text-decoration-none"
+                                                },
+                                                {
+                                                    text: "Excluir Endereço",
+                                                    onClick: function (e) {
+                                                        const addressId = e.row.data.Id;
+                                                        if (confirm("Tem certeza de que deseja deletar este endereço?")) {
+                                                            $.ajax({
+                                                                url: `/Customer/DeleteAddress/${addressId}`,
+                                                                type: "POST",
+                                                                success: function () {
+                                                                    location.reload();
+                                                                },
+                                                                error: function () {
+                                                                    alert("Erro ao deletar o endereço");
+                                                                }
+                                                            });
+                                                        }
                                                     },
-                                                    {
-                                                        text: "Excluir Endereço",
-                                                        onClick: function (e) {
-                                                            const addressId = e.row.data.Id;
-                                                            if (confirm("Tem certeza de que deseja deletar este endereço?")) {
-                                                                $.ajax({
-                                                                        url: `/Customer/DeleteAddress/${addressId}`,
-                                                                    type: "POST",
-                                                                    success: function () {
-                                                                        location.reload();
-                                                                    },
-                                                                    error: function () {
-                                                                        alert("Erro ao deletar o endereço");
-                                                                    }
-                                                                });
-                                                            }
-                                                        },
-                                                        cssClass: "btn btn-danger mx-1 button-custom text-white text-decoration-none"
-                                                    }
-                                                ]
-                                            }
-                                        ],
-                                        showBorders: true,
-                                        height: 150,
-                                        paging: { pageSize: 5 },
-                                        sorting: { mode: "multiple" },
-                                        rowAlternationEnabled: true
-                                    }).appendTo(container);
-                            } else {
-                                $("<div>Não há endereços disponíveis</div>").appendTo(container);
-                            }
+                                                    cssClass: "btn btn-danger mx-1 button-custom text-white text-decoration-none"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    showBorders: true,
+                                    height: 180,
+                                    paging: { pageSize: 5 },
+                                    sorting: { mode: "multiple" },
+                                    rowAlternationEnabled: true
+                                }).appendTo(container);
+                        } else {
+                            $("<div>Não há endereços disponíveis</div>").appendTo(container);
                         }
-                    },
-                    showBorders: true,
-                    columnAutoWidth: true,
-                    rowAlternationEnabled: true,
-                    headerFilter: {
-                        visible: true
-                    },
-                    summary: {
-                        totalItems: [{
-                            column: "Id",
-                            summaryType: "count",
-                            displayFormat: "Total: {0}"
-                        }]
+
+                        // Adiciona uma linha personalizada no final com o botão "Adicionar Endereço"
+                        $("<div class='add-address-row' style='margin-top: 10px;'>")
+                            .append(
+                                $("<button>")
+                                    .text("Adicionar Novo Endereço")
+                                    .addClass("btn btn-success")
+                                    .on("click", function () {
+                                        // Armazena o ID do cliente no sessionStorage
+                                        sessionStorage.setItem("customerId", customer.Id);
+
+                                        // Redireciona para a página de adição de endereço, passando o ID do cliente
+                                        window.location.href = `/Customer/AddAddress/${customer.Id}`;
+                                    })
+                            )
+                            .appendTo(container);
                     }
-                });
+                },
+                showBorders: true,
+                columnAutoWidth: true,
+                rowAlternationEnabled: true,
+                headerFilter: {
+                    visible: true
+                },
+                summary: {
+                    totalItems: [{
+                        column: "Id",
+                        summaryType: "count",
+                        displayFormat: "Total: {0}"
+                    }]
+                }
             });
-        </script>
+
+            // Quando o usuário confirma a exclusão do cliente
+            $('#confirmDeleteCustomer').click(function () {
+                if (customerToDelete) {
+                    $.ajax({
+                        url: `/Customer/Delete/${customerToDelete}`,
+                        type: "POST",
+                        success: function () {
+                            $('#deleteCustomerModal').modal('hide');
+                            $('#successModal').modal('show'); // Exibe o modal de sucesso
+                        },
+                        error: function () {
+                            alert("Erro ao deletar o cliente");
+                        }
+                    });
+                }
+            });
+
+            // Quando o usuário confirma a exclusão do endereço
+            $('#confirmDeleteAddress').click(function () {
+                if (addressToDelete) {
+                    $.ajax({
+                        url: `/Customer/DeleteAddress/${addressToDelete}`,
+                        type: "POST",
+                        success: function () {
+                            $('#deleteAddressModal').modal('hide');
+                            $('#successModal').modal('show'); // Exibe o modal de sucesso
+                        },
+                        error: function () {
+                            alert("Erro ao deletar o endereço");
+                        }
+                    });
+                }
+            });
+
+            // Quando o modal de sucesso é fechado, recarregue a página
+            $('#successModal').on('hidden.bs.modal', function () {
+                location.reload();
+            });
+        });
+    </script>
 }
 
 <style>

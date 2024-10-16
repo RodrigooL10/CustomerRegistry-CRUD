@@ -56,6 +56,7 @@ namespace CustomerRegistrySystem.Controllers
 
         //Adicionar Endereço
         [HttpGet]
+        //[Route("Customer/AddAddress")]
         public async Task<IActionResult> AddAddress(Guid customerId)
         {
             var model = new AddAddressViewModel
@@ -271,6 +272,21 @@ namespace CustomerRegistrySystem.Controllers
             }
 
             return NotFound(); // Endereço não encontrado
+        }
+
+
+
+
+        [HttpGet]
+        public IActionResult GetExistingAddressTypes(Guid customerId)
+        {
+            var existingTypes = customerRegistryDBContext.Addresses
+                .Where(a => a.CustomerId == customerId)
+                .Select(a => a.Type)
+                .Distinct()
+                .ToList();
+
+            return Json(existingTypes);
         }
 
     }

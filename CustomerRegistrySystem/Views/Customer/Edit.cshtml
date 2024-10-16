@@ -16,5 +16,46 @@
         <input asp-for="Phone" class="form-control" />
     </div>
 
-    <button type="submit" class="btn btn-success">Salvar</button>
+    <button type="button" id="confirmEditBtn" class="btn btn-success">Salvar</button>
 </form>
+
+<!-- Modal de Confirmação -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">Confirmar Edição</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Tem certeza de que deseja salvar as alterações feitas no cliente?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" id="confirmSaveBtn" class="btn btn-success">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Quando o botão "Salvar" é clicado, abre o modal de confirmação
+            $('#confirmEditBtn').click(function () {
+                $('#confirmationModal').modal('show');
+            });
+
+            // Quando o botão "Salvar" dentro do modal é clicado
+            $('#confirmSaveBtn').click(function () {
+                // Fecha o modal
+                $('#confirmationModal').modal('hide');
+
+                // Submete o formulário
+                $('#editCustomerForm').submit();
+            });
+        });
+    </script>
+}
