@@ -4,27 +4,31 @@
 
 <form id="addAddressForm" asp-action="AddAddress" method="post">
     <input type="hidden" asp-for="CustomerId" id="customerId" />
-    <div class="form-group">
-        <label>Rua</label>
-        <input asp-for="Street" class="form-control" />
+    <div class="mb-3">
+        <label class="form-label">Rua</label>
+        <input asp-for="Street" placeholder="Digite a Rua" class="form-control" required/>
     </div>
-    <div class="form-group">
-        <label>Cidade</label>
-        <input asp-for="City" class="form-control" />
+    <div class="mb-3">
+        <label class="form-label">Número</label>
+        <input asp-for="Number" placeholder="Digite o Número" class="form-control" required />
     </div>
-    <div class="form-group">
-        <label>Estado</label>
-        <input asp-for="State" class="form-control" />
+    <div class="mb-3">
+        <label class="form-label">Cidade</label>
+        <input asp-for="City" placeholder="Digite a Cidade" class="form-control" required />
     </div>
-    <div class="form-group">
-        <label>CEP</label>
-        <input asp-for="CEP" class="form-control" />
+    <div class="mb-3">
+        <label class="form-label">Estado</label>
+        <input asp-for="State" placeholder="Digite o Estado" class="form-control" required />
     </div>
-    <div class="form-group">
-        <label>Complemento</label>
-        <input asp-for="Complement" class="form-control" />
+    <div class="mb-3">
+        <label class="form-label">CEP</label>
+        <input asp-for="CEP" placeholder="Digite o CEP" class="form-control" required />
     </div>
-    <div class="form-group">
+    <div class="mb-3">
+        <label class="form-label">Complemento</label>
+        <input asp-for="Complement" placeholder="Digite o Complemento" class="form-control" />
+    </div>
+    <div class="mb-3">
         <label>Tipo</label>
         <select asp-for="Type" class="form-select">
             <option value="Fiscal">Fiscal</option>
@@ -36,7 +40,9 @@
     <button type="submit" class="btn btn-success">Salvar</button>
 </form>
 
-<!-- Modal de sucesso -->
+
+
+
 <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -56,7 +62,6 @@
     </div>
 </div>
 
-<!-- Modal de confirmação para adicionar outro endereço -->
 <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -77,9 +82,11 @@
     </div>
 </div>
 
+
 @section Scripts {
     <script>
         $(document).ready(function () {
+
             // Verifica se o customerId está no sessionStorage ou na URL
             var customerId = sessionStorage.getItem('customerId');
             if (!customerId) {
@@ -95,6 +102,7 @@
             }
 
             console.log("Customer ID na chegada:", customerId);
+
 
             // Lógica para salvar o endereço
             $('#addAddressForm').on('submit', function (e) {
@@ -112,6 +120,7 @@
                     data: form.serialize(),
                     success: function (response) {
                         if (response.success) {
+
                             // Exibe o modal de sucesso
                             $('#successModal').modal('show');
                         } else {

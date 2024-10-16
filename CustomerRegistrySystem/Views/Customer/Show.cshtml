@@ -9,7 +9,7 @@
 
 <div id="gridCustomers"></div>
 
-<!-- Modal para confirmação de exclusão de cliente -->
+
 <div class="modal fade" id="deleteCustomerModal" tabindex="-1" role="dialog" aria-labelledby="deleteCustomerModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -30,7 +30,7 @@
     </div>
 </div>
 
-<!-- Modal para confirmação de exclusão de endereço -->
+
 <div class="modal fade" id="deleteAddressModal" tabindex="-1" role="dialog" aria-labelledby="deleteAddressModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -51,7 +51,7 @@
     </div>
 </div>
 
-<!-- Modal para confirmação de sucesso -->
+
 <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -85,10 +85,23 @@
             $("#gridCustomers").dxDataGrid({
                 dataSource: customers,
                 columns: [
-                    { dataField: "Id", caption: "ID" },
                     { dataField: "Name", caption: "Nome" },
+                    { dataField: "CPF", caption: "CPF" },
                     { dataField: "Email", caption: "Email" },
                     { dataField: "Phone", caption: "Telefone" },
+                    { dataField: "DateOfBirth", caption: "Data de Nasc." },
+                    {
+                        dataField: "Gender",
+                        caption: "Gênero",
+                        calculateDisplayValue: function (data) {
+                            switch (data.Gender) {
+                                case 0: return "Masculino";
+                                case 1: return "Faminino";
+                                case 2: return "Outro";
+                                default: return "Desconhecido";
+                            }
+                        }
+                    },
                     {
                         type: "buttons",
                         buttons: [
@@ -128,6 +141,7 @@
                                     dataSource: customer.Addresses.$values,
                                     columns: [
                                         { dataField: "Street", caption: "Rua" },
+                                        { dataField: "Number", caption: "Número" },
                                         { dataField: "City", caption: "Cidade" },
                                         { dataField: "State", caption: "Estado" },
                                         { dataField: "CEP", caption: "CEP" },
@@ -153,7 +167,7 @@
                                                         const addressId = e.row.data.Id;
                                                         window.location.href = `/Customer/EditAddress/${addressId}`;
                                                     },
-                                                    cssClass: "btn btn-warning mx-1 button-custom text-white text-decoration-none"
+                                                    cssClass: "btn btn-primary mx-1 button-custom text-white text-decoration-none"
                                                 },
                                                 {
                                                     text: "Excluir Endereço",
@@ -227,7 +241,7 @@
                         type: "POST",
                         success: function () {
                             $('#deleteCustomerModal').modal('hide');
-                            $('#successModal').modal('show'); // Exibe o modal de sucesso
+                            $('#successModal').modal('show'); 
                         },
                         error: function () {
                             alert("Erro ao deletar o cliente");
@@ -244,7 +258,7 @@
                         type: "POST",
                         success: function () {
                             $('#deleteAddressModal').modal('hide');
-                            $('#successModal').modal('show'); // Exibe o modal de sucesso
+                            $('#successModal').modal('show'); 
                         },
                         error: function () {
                             alert("Erro ao deletar o endereço");
@@ -262,74 +276,108 @@
 }
 
 <style>
-    .button-margin {
-        margin-right: 10px;
-        text-decoration: none;
-        display: inline-block;
-        padding: 5px 10px;
-        border-radius: 5px;
-        color: white;
-        border: none;
-        cursor: pointer;
-    }
-
-    .button-custom {
-        background-color: #007bff;
-    }
-
-    .button-custom:hover {
-        background-color: #0056b3;
-    }
-
-    /* Estilos personalizados para o grid */
+    /* Estilo geral do grid */
     .dx-datagrid {
         font-family: Arial, sans-serif;
+        border-radius: 8px; /* Bordas arredondadas */
+        overflow: hidden; /* Para esconder as bordas nos cantos */
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra leve */
     }
 
     /* Estilo dos cabeçalhos do grid */
     .dx-datagrid-header-row {
-        background-color: #007bff; /* Azul */
-        color: white;
+        background-color: #007bff; /* Azul forte */
+        color: #ffffff; /* Texto branco */
+        font-weight: bold; /* Negrito */
+        text-align: center; /* Centralizar texto */
     }
 
-    /* Estilo das linhas alternadas do grid */
-    .dx-datagrid-content tr:nth-child(even) {
-        background-color: #f8f9fa; /* Cinza claro */
+    /* Estilo das células do grid */
+    .dx-datagrid-content {
+        background-color: #ffffff; /* Branco para as células */
     }
 
-    .dx-datagrid-content tr:nth-child(odd) {
-        background-color: #ffffff; /* Branco */
-    }
+        /* Estilo das linhas alternadas do grid */
+        .dx-datagrid-content tr:nth-child(even) {
+            background-color: #f0f8ff; /* Azul claro para linhas pares */
+        }
+
+        .dx-datagrid-content tr:nth-child(odd) {
+            background-color: #ffffff; /* Branco para linhas ímpares */
+        }
+
+        /* Efeito hover nas linhas */
+        .dx-datagrid-content tr:hover {
+            background-color: #e0f7fa; /* Azul muito claro no hover */
+            transition: background-color 0.3s ease; /* Transição suave */
+        }
 
     /* Estilo para linhas de detalhes do master-detail */
     .dx-datagrid-master-detail {
-        background-color: #e9ecef; /* Cinza mais escuro */
+        background-color: #d0d3d4; /* Cinza claro */
     }
 
     /* Estilo dos botões */
     .button-custom {
-        padding: 5px 10px;
-        border-radius: 4px;
+        padding: 8px 12px;
+        border-radius: 5px;
         font-size: 14px;
+        transition: background-color 0.3s ease; /* Transição suave */
     }
 
-    /* Estilos para botões */
     .btn-primary {
-        border-color: #28a745;
+        background-color: #007bff; /* Azul */
+        border: none; /* Sem borda */
     }
 
     .btn-danger {
         background-color: #dc3545; /* Vermelho */
-        border-color: #dc3545;
+        border: none; /* Sem borda */
     }
 
-    /* Hover effect for buttons */
+    /* Efeito hover para botões */
     .btn-primary:hover {
-        border-color: #1e7e34;
+        background-color: #0056b3; /* Azul mais escuro */
     }
 
     .btn-danger:hover {
-        background-color: #c82333;
-        border-color: #bd2130;
+        background-color: #c82333; /* Vermelho mais escuro */
     }
+
+    /* Estilo do botão "Adicionar Novo Endereço" */
+    .add-address-row button {
+        margin-top: 10px;
+        padding: 8px 12px;
+        border-radius: 5px;
+        background-color: #28a745; /* Verde */
+        color: white; /* Texto branco */
+        border: none; /* Sem borda */
+        transition: background-color 0.3s ease; /* Transição suave */
+    }
+
+        /* Efeito hover para o botão "Adicionar Novo Endereço" */
+        .add-address-row button:hover {
+            background-color: #218838; /* Verde mais escuro */
+        }
+
+    /* Estilos para a caixa de pesquisa e filtros */
+    .dx-search-panel {
+        background-color: #007bff; /* Azul forte */
+        border-radius: 5px; /* Bordas arredondadas */
+        padding: 10px; /* Espaçamento interno */
+        margin-bottom: 10px; /* Margem inferior */
+    }
+
+        .dx-search-panel input {
+            border: none; /* Sem borda */
+            border-radius: 4px; /* Bordas arredondadas */
+            padding: 8px; /* Espaçamento interno */
+            width: 100%; /* Largura total */
+        }
+
+            .dx-search-panel input:focus {
+                outline: none; /* Sem contorno */
+                box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Sombra leve ao focar */
+            }
 </style>
+

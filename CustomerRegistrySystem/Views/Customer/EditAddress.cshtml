@@ -4,27 +4,31 @@
 
 <form id="editAddressForm" asp-action="EditAddress" method="post">
     <input type="hidden" asp-for="Id" />
-    <div class="form-group">
+    <div class="mb-3">
         <label>Rua</label>
         <input asp-for="Street" class="form-control" />
     </div>
-    <div class="form-group">
+    <div class="mb-3">
+        <label>Número</label>
+        <input asp-for="Number" class="form-control" />
+    </div>
+    <div class="mb-3">
         <label>Cidade</label>
         <input asp-for="City" class="form-control" />
     </div>
-    <div class="form-group">
+    <div class="mb-3">
         <label>Estado</label>
         <input asp-for="State" class="form-control" />
     </div>
-    <div class="form-group">
+    <div class="mb-3">
         <label>CEP</label>
         <input asp-for="CEP" class="form-control" />
     </div>
-    <div class="form-group">
+    <div class="mb-3">
         <label>Complemento</label>
         <input asp-for="Complement" class="form-control" />
     </div>
-    <div class="form-group">
+    <div class="mb-3">
         <label>Tipo</label>
         <select asp-for="Type" class="form-select">
             <option value="Fiscal">Fiscal</option>
@@ -36,7 +40,7 @@
     <button type="button" id="confirmEditBtn" class="btn btn-success">Salvar</button>
 </form>
 
-<!-- Modal de Confirmação -->
+
 <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -60,6 +64,7 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
+
             // Quando o botão "Salvar" é clicado, abre o modal de confirmação
             $('#confirmEditBtn').click(function () {
                 $('#confirmationModal').modal('show');

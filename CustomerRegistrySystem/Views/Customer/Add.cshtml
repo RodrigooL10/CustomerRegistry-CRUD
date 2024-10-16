@@ -1,19 +1,36 @@
 ﻿@model CustomerRegistrySystem.Models.AddCustomerViewModel
 
-<h1>Add Customer</h1>
+<h1>Adicionar Cliente</h1>
 
 <form method="post" action="Add">
     <div class="mb-3">
         <label class="form-label">Nome</label>
-        <input type="text" class="form-control" asp-for="Name" required>
+        <input type="text" class="form-control" asp-for="Name" placeholder="Insira seu nome" required>
     </div>
     <div class="mb-3">
         <label class="form-label">Email</label>
-        <input type="email" class="form-control" asp-for="Email" required>
+        <input type="email" class="form-control" asp-for="Email" placeholder="Insira seu email" required>
     </div>
     <div class="mb-3">
         <label class="form-label">Telefone</label>
-        <input type="text" class="form-control" asp-for="Phone" required>
+        <input type="text" class="form-control" asp-for="Phone" placeholder="Insira seu telefone" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">CPF</label>
+        <input type="text" class="form-control" asp-for="CPF" placeholder="Insira seu CPF" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Data de Nascimento</label>
+        <input type="date" class="form-control" asp-for="DateOfBirth" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Gênero</label>
+        <select class="form-select" asp-for="Gender" required>
+            <option value="" disabled selected>Selecione um gênero</option>
+            <option value="Male">Masculino</option>
+            <option value="Female">Feminino</option>
+            <option value="Other">Outro</option>
+        </select>
     </div>
 
     <button type="submit" class="btn btn-primary">Enviar</button>

@@ -3,23 +3,39 @@
 <h1>Editar Cliente</h1>
 
 <form id="editCustomerForm" asp-action="Edit" method="post">
-    <div class="form-group">
-        <label for="Name">Nome</label>
-        <input asp-for="Name" class="form-control" />
+    <div class="mb-3">
+        <label class="form-label">Nome</label>
+        <input type="text" class="form-control" asp-for="Name" required>
     </div>
-    <div class="form-group">
-        <label for="Email">Email</label>
-        <input asp-for="Email" class="form-control" />
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" asp-for="Email" required>
     </div>
-    <div class="form-group">
-        <label for="Phone">Telefone</label>
-        <input asp-for="Phone" class="form-control" />
+    <div class="mb-3">
+        <label class="form-label">Telefone</label>
+        <input type="text" class="form-control" asp-for="Phone" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">CPF</label>
+        <input type="text" class="form-control" asp-for="CPF" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Data de Nascimento</label>
+        <input type="date" class="form-control" asp-for="DateOfBirth" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Gênero</label>
+        <select class="form-select" asp-for="Gender" required>
+            <option value="Male">Masculino</option>
+            <option value="Female">Feminino</option>
+            <option value="Other">Outro</option>
+        </select>
     </div>
 
     <button type="button" id="confirmEditBtn" class="btn btn-success">Salvar</button>
 </form>
 
-<!-- Modal de Confirmação -->
+
 <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
