@@ -1,4 +1,4 @@
-﻿@model CustomerRegistrySystem.Models.AddCustomerViewModel
+﻿@model CustomerRegistrySystem.Application.ViewModels.AddCustomerViewModel
 
 <h1>Adicionar Cliente</h1>
 
@@ -13,11 +13,11 @@
     </div>
     <div class="mb-3">
         <label class="form-label">Telefone</label>
-        <input type="text" class="form-control" asp-for="Phone" placeholder="Insira seu telefone" required>
+        <input type="text" id="Phone" name="Phone" class="form-control" asp-for="Phone" placeholder="Insira seu telefone" required>
     </div>
     <div class="mb-3">
         <label class="form-label">CPF</label>
-        <input type="text" class="form-control" asp-for="CPF" placeholder="Insira seu CPF" required>
+        <input type="text" id="CPF" name="CPF" class="form-control" asp-for="CPF" placeholder="Insira seu CPF" required>
     </div>
     <div class="mb-3">
         <label class="form-label">Data de Nascimento</label>
@@ -27,9 +27,9 @@
         <label class="form-label">Gênero</label>
         <select class="form-select" asp-for="Gender" required>
             <option value="" disabled selected>Selecione um gênero</option>
-            <option value="Male">Masculino</option>
-            <option value="Female">Feminino</option>
-            <option value="Other">Outro</option>
+            <option value="0">Masculino</option>
+            <option value="1">Feminino</option>
+            <option value="2">Outro</option>
         </select>
     </div>
 

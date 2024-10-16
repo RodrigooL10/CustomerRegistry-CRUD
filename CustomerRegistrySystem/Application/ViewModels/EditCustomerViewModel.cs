@@ -1,6 +1,6 @@
-﻿using CustomerRegistrySystem.Models.Domain;
+﻿using CustomerRegistrySystem.Domain;
 
-namespace CustomerRegistrySystem.Models
+namespace CustomerRegistrySystem.Application.ViewModels
 {
 
     public class EditCustomerViewModel

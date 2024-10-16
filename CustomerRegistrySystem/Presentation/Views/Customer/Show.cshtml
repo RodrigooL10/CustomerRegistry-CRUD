@@ -1,7 +1,5 @@
-﻿@model List<CustomerRegistrySystem.Models.Domain.Customer>
-@{
-    ViewData["Title"] = "Clientes";
-}
+﻿@model List<CustomerRegistrySystem.Domain.Customer>
+
 @using DevExtreme.AspNet.Data
 @using DevExtreme.AspNet.Mvc
 
@@ -77,11 +75,20 @@
 @section Scripts {
     <script>
         $(function () {
+            //Serializa os dados do modelo para uso no Javascript
             const data = @Html.Raw(Json.Serialize(Model));
+
+            //Obtém a lista de clientes
             const customers = data.$values;
+
+            // Variável para armazenar o ID do cliente a ser deletado
             let customerToDelete = null;
+
+            // Variável para armazenar o ID do endereço a ser deletado
             let addressToDelete = null;
 
+
+            // Configuração do DataGrid para exibir os clientes
             $("#gridCustomers").dxDataGrid({
                 dataSource: customers,
                 columns: [
@@ -89,26 +96,31 @@
                     { dataField: "CPF", caption: "CPF" },
                     { dataField: "Email", caption: "Email" },
                     { dataField: "Phone", caption: "Telefone" },
-                    { dataField: "DateOfBirth", caption: "Data de Nasc." },
+                    { dataField: "DateOfBirth", caption: "Data de Nasc.", dataType: "date", format: "dd-MM-yyyy" },
                     {
                         dataField: "Gender",
                         caption: "Gênero",
                         calculateDisplayValue: function (data) {
                             switch (data.Gender) {
+                                //Formata a exibição do Gênero
                                 case 0: return "Masculino";
-                                case 1: return "Faminino";
+                                case 1: return "Feminino";
                                 case 2: return "Outro";
                                 default: return "Desconhecido";
                             }
                         }
                     },
                     {
+                        //Cpçina de botões para ações
                         type: "buttons",
                         buttons: [
                             {
                                 text: "Editar Cliente",
                                 onClick: function (e) {
+                                    //Obtém o id cliente
                                     const id = e.row.data.Id;
+
+                                    //Redireciona para página de Edição
                                     window.location.href = `/Customer/Edit/${id}`;
                                 },
                                 cssClass: "btn btn-primary mx-1 button-custom text-white text-decoration-none"
@@ -116,8 +128,11 @@
                             {
                                 text: "Deletar Cliente",
                                 onClick: function (e) {
-                                    customerToDelete = e.row.data.Id; // Armazena o ID do cliente a ser deletado
-                                    $('#deleteCustomerModal').modal('show'); // Exibe o modal de confirmação
+                                    // Armazena o ID do cliente a ser deletado
+                                    customerToDelete = e.row.data.Id;
+
+                                    // Exibe o modal de confirmação
+                                    $('#deleteCustomerModal').modal('show'); 
                                 },
                                 cssClass: "btn btn-danger mx-1 button-custom text-white text-decoration-none"
                             }
@@ -129,9 +144,10 @@
                 sorting: { mode: "multiple" },
                 searchPanel: { visible: true, placeholder: "Pesquisar..." },
                 filterRow: { visible: true, applyFilter: "auto" },
-                masterDetail: {
+                masterDetail: { //Tabela de endereços
                     enabled: true,
                     template: function (container, options) {
+                        //Obt[em os dados do cliente]
                         var customer = options.data;
 
                         // Cria o grid para exibir os endereços do cliente, se houver
@@ -151,6 +167,7 @@
                                             caption: "Tipo de Endereço",
                                             calculateDisplayValue: function (data) {
                                                 switch (data.Type) {
+                                                    //Fpr,ata a exibção do tipo de endereço
                                                     case 0: return "Fiscal";
                                                     case 1: return "Cobrança";
                                                     case 2: return "Entrega";
@@ -164,7 +181,10 @@
                                                 {
                                                     text: "Editar Endereço",
                                                     onClick: function (e) {
+                                                        //Obtém o ID do endereço
                                                         const addressId = e.row.data.Id;
+
+                                                        //Redireciona para a página de Edição
                                                         window.location.href = `/Customer/EditAddress/${addressId}`;
                                                     },
                                                     cssClass: "btn btn-primary mx-1 button-custom text-white text-decoration-none"
@@ -172,19 +192,12 @@
                                                 {
                                                     text: "Excluir Endereço",
                                                     onClick: function (e) {
+                                                        // Armazena o ID do endereço a ser deletado
                                                         const addressId = e.row.data.Id;
-                                                        if (confirm("Tem certeza de que deseja deletar este endereço?")) {
-                                                            $.ajax({
-                                                                url: `/Customer/DeleteAddress/${addressId}`,
-                                                                type: "POST",
-                                                                success: function () {
-                                                                    location.reload();
-                                                                },
-                                                                error: function () {
-                                                                    alert("Erro ao deletar o endereço");
-                                                                }
-                                                            });
-                                                        }
+                                                        addressToDelete = addressId;
+
+                                                        // Exibe o modal de confirmação
+                                                        $('#deleteAddressModal').modal('show'); 
                                                     },
                                                     cssClass: "btn btn-danger mx-1 button-custom text-white text-decoration-none"
                                                 }
@@ -198,6 +211,7 @@
                                     rowAlternationEnabled: true
                                 }).appendTo(container);
                         } else {
+                            //Mensagem quando não há endereços disponíveis
                             $("<div>Não há endereços disponíveis</div>").appendTo(container);
                         }
 
@@ -267,7 +281,7 @@
                 }
             });
 
-            // Quando o modal de sucesso é fechado, recarregue a página
+            // Quando o modal de sucesso é fechado, recarrega a página
             $('#successModal').on('hidden.bs.modal', function () {
                 location.reload();
             });
@@ -279,42 +293,42 @@
     /* Estilo geral do grid */
     .dx-datagrid {
         font-family: Arial, sans-serif;
-        border-radius: 8px; /* Bordas arredondadas */
-        overflow: hidden; /* Para esconder as bordas nos cantos */
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra leve */
+        border-radius: 8px; 
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
     /* Estilo dos cabeçalhos do grid */
     .dx-datagrid-header-row {
-        background-color: #007bff; /* Azul forte */
-        color: #ffffff; /* Texto branco */
-        font-weight: bold; /* Negrito */
-        text-align: center; /* Centralizar texto */
+        background-color: #007bff; 
+        color: #ffffff; 
+        font-weight: bold; 
+        text-align: center;
     }
 
     /* Estilo das células do grid */
     .dx-datagrid-content {
-        background-color: #ffffff; /* Branco para as células */
+        background-color: #ffffff; 
     }
 
         /* Estilo das linhas alternadas do grid */
         .dx-datagrid-content tr:nth-child(even) {
-            background-color: #f0f8ff; /* Azul claro para linhas pares */
+            background-color: #f0f8ff; 
         }
 
         .dx-datagrid-content tr:nth-child(odd) {
-            background-color: #ffffff; /* Branco para linhas ímpares */
+            background-color: #ffffff; 
         }
 
         /* Efeito hover nas linhas */
         .dx-datagrid-content tr:hover {
-            background-color: #e0f7fa; /* Azul muito claro no hover */
-            transition: background-color 0.3s ease; /* Transição suave */
+            background-color: #e0f7fa; 
+            transition: background-color 0.3s ease;
         }
 
     /* Estilo para linhas de detalhes do master-detail */
     .dx-datagrid-master-detail {
-        background-color: #d0d3d4; /* Cinza claro */
+        background-color: #d0d3d4; 
     }
 
     /* Estilo dos botões */
@@ -322,26 +336,26 @@
         padding: 8px 12px;
         border-radius: 5px;
         font-size: 14px;
-        transition: background-color 0.3s ease; /* Transição suave */
+        transition: background-color 0.3s ease; 
     }
 
     .btn-primary {
-        background-color: #007bff; /* Azul */
-        border: none; /* Sem borda */
+        background-color: #007bff;
+        border: none; 
     }
 
     .btn-danger {
-        background-color: #dc3545; /* Vermelho */
-        border: none; /* Sem borda */
+        background-color: #dc3545; 
+        border: none; 
     }
 
     /* Efeito hover para botões */
     .btn-primary:hover {
-        background-color: #0056b3; /* Azul mais escuro */
+        background-color: #0056b3; 
     }
 
     .btn-danger:hover {
-        background-color: #c82333; /* Vermelho mais escuro */
+        background-color: #c82333; 
     }
 
     /* Estilo do botão "Adicionar Novo Endereço" */
@@ -349,35 +363,35 @@
         margin-top: 10px;
         padding: 8px 12px;
         border-radius: 5px;
-        background-color: #28a745; /* Verde */
-        color: white; /* Texto branco */
-        border: none; /* Sem borda */
-        transition: background-color 0.3s ease; /* Transição suave */
+        background-color: #28a745; 
+        color: white; 
+        border: none;
+        transition: background-color 0.3s ease; 
     }
 
         /* Efeito hover para o botão "Adicionar Novo Endereço" */
         .add-address-row button:hover {
-            background-color: #218838; /* Verde mais escuro */
+            background-color: #218838;
         }
 
     /* Estilos para a caixa de pesquisa e filtros */
     .dx-search-panel {
-        background-color: #007bff; /* Azul forte */
-        border-radius: 5px; /* Bordas arredondadas */
-        padding: 10px; /* Espaçamento interno */
-        margin-bottom: 10px; /* Margem inferior */
+        background-color: #007bff;
+        border-radius: 5px; 
+        padding: 10px; 
+        margin-bottom: 10px; 
     }
 
         .dx-search-panel input {
-            border: none; /* Sem borda */
-            border-radius: 4px; /* Bordas arredondadas */
-            padding: 8px; /* Espaçamento interno */
-            width: 100%; /* Largura total */
+            border: none; 
+            border-radius: 4px; 
+            padding: 8px;
+            width: 100%; 
         }
 
             .dx-search-panel input:focus {
-                outline: none; /* Sem contorno */
-                box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Sombra leve ao focar */
+                outline: none;
+                box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); 
             }
 </style>
 

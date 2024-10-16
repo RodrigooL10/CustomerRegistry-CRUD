@@ -1,4 +1,4 @@
-namespace CustomerRegistrySystem.Models
+namespace CustomerRegistrySystem.Application.ViewModels
 {
     public class ErrorViewModel
     {

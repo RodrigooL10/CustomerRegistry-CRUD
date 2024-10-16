@@ -1,7 +1,6 @@
-﻿using CustomerRegistrySystem.Models.Domain;
-using System.ComponentModel.DataAnnotations;
+﻿using CustomerRegistrySystem.Domain;
 
-namespace CustomerRegistrySystem.Models
+namespace CustomerRegistrySystem.Application.ViewModels
 {
     public class AddCustomerViewModel
     {

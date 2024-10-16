@@ -34,6 +34,7 @@
             </div>
         </nav>
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
@@ -47,9 +48,17 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    <script src="https://cdn3.devexpress.com/jslib/23.1.4/js/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script src="https://cdn3.devexpress.com/jslib/23.1.4/js/dx.all.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        //Máscara para inputs
+        $(document).ready(function () {
+            $('#CPF').mask('000.000.000-00', { reverse: true });
+            $('#CEP').mask('00000-000');
+            $('#Phone').mask('(00) 00000-0000');
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

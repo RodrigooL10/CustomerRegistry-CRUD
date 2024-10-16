@@ -1,8 +1,8 @@
-using CustomerRegistrySystem.Models;
+using CustomerRegistrySystem.Application.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace CustomerRegistrySystem.Controllers
+namespace CustomerRegistrySystem.Presentation.Controllers
 {
     public class HomeController : Controller
     {
@@ -14,11 +14,6 @@ namespace CustomerRegistrySystem.Controllers
         }
 
         public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult Privacy()
         {
             return View();
         }

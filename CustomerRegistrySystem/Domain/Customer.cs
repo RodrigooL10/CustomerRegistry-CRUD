@@ -1,6 +1,4 @@
-﻿using System.Net;
-
-namespace CustomerRegistrySystem.Models.Domain
+﻿namespace CustomerRegistrySystem.Domain
 {
     public class Customer
     {

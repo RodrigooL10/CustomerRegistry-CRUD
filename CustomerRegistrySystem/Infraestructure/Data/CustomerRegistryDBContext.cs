@@ -1,7 +1,7 @@
-﻿using CustomerRegistrySystem.Models.Domain;
+﻿using CustomerRegistrySystem.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace CustomerRegistrySystem.Data
+namespace CustomerRegistrySystem.Infraestructure.Data
 {
     public class CustomerRegistryDBContext : DbContext
     {

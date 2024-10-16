@@ -1,4 +1,4 @@
-﻿@model CustomerRegistrySystem.Models.EditCustomerViewModel
+﻿@model CustomerRegistrySystem.Application.ViewModels.EditCustomerViewModel
 
 <h1>Editar Cliente</h1>
 
@@ -26,9 +26,9 @@
     <div class="mb-3">
         <label class="form-label">Gênero</label>
         <select class="form-select" asp-for="Gender" required>
-            <option value="Male">Masculino</option>
-            <option value="Female">Feminino</option>
-            <option value="Other">Outro</option>
+            <option value="0">Masculino</option>
+            <option value="1">Feminino</option>
+            <option value="2">Outro</option>
         </select>
     </div>
 
